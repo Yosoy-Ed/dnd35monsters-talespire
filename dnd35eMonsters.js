@@ -1,5 +1,4 @@
 /////////////////////////////////////////////////// SRD MONSTERS ////////////////////////////////////////////////
-
 var monsterDetailsArray = [];
 var srdMonsterData = {};
 var selectedListMonsterTemplate = `<br>
@@ -182,7 +181,7 @@ function loadMonsterData() {
     xmlHttpRequest.send();
   });
 }
-
+//////////////////////////////////////////////////// INIT //////////////////////////////////////////////////////
 window.onload = function () {
 
   loadMonsterData().then(monsterData => {
@@ -220,7 +219,7 @@ window.onload = function () {
       console.error('Error fetching monster data:', error);
     }
     console.log("populated SRD data");
-    loadingFromMemory(); //---------------------------------------------------------------------
+    loadingFromMemory(); //------------------------------------------------------////////////////////////////-
     console.log("loaded data from memory");
   }).catch(error => {
     console.error("Error loading monster data:", error);
@@ -232,7 +231,11 @@ function searchsrdmonster() {
   viewsrdmonster(document.getElementById('input-datalist').value);
 }
 */
-// SRD TAB showing monsters 
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+/////////////////////////////////// SRD TAB showing monsters ////////////////////////////////////////////////
+
 function viewsrdmonster(monsterToShow) {
 
   const valueElement = document.getElementById('selectedSrdMonster');
@@ -255,14 +258,26 @@ function viewsrdmonster(monsterToShow) {
 
 }
 
-//////////////////////////////////////////////////// ROLL ///////////////////////////////////////////////
+//////////////////////////////////////////////////// ROLL //////////////////////////////////////////////////////
 
 //rollValue('Hit Points','4d8+11')
 async function rollValue(name, dice) {
   dice = dice.replace(` `, ``);
-  console.log(`${name} -> ${dice}`)
 
-  TS.dice.putDiceInTray([{ name: name, roll: dice }], false);
+  console.log(`${name} -> ${dice}`);
+
+  const regexd2 = /d2\b/g;
+  const regexd3 = /d3\b/g;
+
+  if (regexd2.test(dice) || regexd3.test(dice)) {
+
+    d2d3Check(name, dice);
+
+  } else {
+
+    TS.dice.putDiceInTray([{ name: name, roll: dice }], false);
+
+  }
 
 }
 
@@ -292,6 +307,8 @@ function AddNewMonster() {
   populateListMonster(formData, false, false, false);
 
 };
+
+//////////////////////////////////////////////// UTILITY ///////////////////////////////////////////////////
 
 // Split an string with a word
 function splitByWord(str, word) {
@@ -344,7 +361,9 @@ function parseAbilities(text, monsterName) {
   });
 }
 
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+//////////////////////////////////// CREATE MONSTER BUTTON ///////////////////////////////////////////////////
 
 //fromSrd = true (srd)  
 function populateListMonster(MonsterObject, fromSrd, srdFromMemory, customFromMemory) {
@@ -478,7 +497,9 @@ function populateListMonster(MonsterObject, fromSrd, srdFromMemory, customFromMe
     }
   }
 }
-// Export to file or Copy to Clipboard ///////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+//////////////////////// Export to file or Copy to Clipboard /////////////////////////////////////////////////
 //true on export
 function ExportMonster(ExportOrCopy) {
 
@@ -505,8 +526,10 @@ function ExportMonster(ExportOrCopy) {
     TS.system.clipboard.setText(json);
   }
 }
+/////////////////////////////////////////////////////////////////////////////////////////////
 
-// import monster from json /////////////////////////////////////////////////////////
+//////////////////////////////// import monster from json ///////////////////////////////////
+
 function ImportMonster(importedMonster) {
 
   const formElement = document.getElementById('customMonsterForm');
@@ -536,7 +559,7 @@ document.getElementById('import-file-input').addEventListener('change', (event) 
 });
 /////////////////////////////////////////////////////////////////////////////////////
 
-// searchSrdMonster without datalist  ///////////////////////////////////////////////
+////////////////////// searchSrdMonster without datalist  ///////////////////////////
 function searchSrdMonster() {
   document.getElementById('search-results').innerHTML = "";
   const searchTerm = document.getElementById('input-search-monster').value;
@@ -566,3 +589,56 @@ function searchSrdMonster() {
   }
 }
 /////////////////////////////////////////////////////////////////////////////////////
+
+
+function d2d3Check(name, dice) {
+
+  try {
+
+    let signMod = '';
+    let diceModSplitted = '';
+    let msg = `<br><align="center"><size=150%><color="red">${name}</color></align><br><br>`;
+    let total = 0;
+
+    if (dice.includes('+') || (!dice.includes('+') && !dice.includes('-'))) {
+
+      signMod = '+';
+      diceModSplitted = dice.split('+');
+
+    } else if (dice.includes('-')) {
+
+      signMod = '-';
+      diceModSplitted = dice.split('-');
+    }
+
+
+    const diceSplitted = diceModSplitted[0].split('d');
+
+    for (let i = 1; i < parseInt(diceSplitted[0]) + 1; i++) {
+
+      const rolld2d3 = 1 + Math.floor(Math.random() * parseInt(diceSplitted[1]));
+
+      diceModSplitted[1] = diceModSplitted[1] === undefined ? 0 : diceModSplitted[1];
+
+      const result = signMod == '+' ? rolld2d3 + parseInt(diceModSplitted[1]) : rolld2d3 - parseInt(diceModSplitted[1]);
+
+      const resultMinimum1 = result <= 0 ? 1 : result;
+
+      total = total + resultMinimum1;      
+
+      //console.log(`roll ${rolld2d3} ${signMod} ${diceModSplitted[1]} = ${result} `)
+
+      msg = msg + 'roll' + ` 1d${diceSplitted[1]}${signMod}${diceModSplitted[1]}   -->   <color="green">${rolld2d3}</color>${signMod}${diceModSplitted[1]} =  <color="green">${result}</color><br>`;
+
+    }    
+
+    msg = msg + `<br><align="center"><size=200%><color="red">TOTAL: </color> <color="green">${total}`
+
+    TS.chat.send(msg, "campaign");
+
+
+  } catch (error) {
+    console.warn('May be an error due to using multiple modifiers, use single modifier')
+    console.error(error);
+  }
+}
