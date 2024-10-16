@@ -1,0 +1,381 @@
+<!doctype html>
+<html lang="en" data-bs-theme="dark">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>DND 3.5e Monsters</title>
+    <link href="bootstrap.css" rel="stylesheet">
+    <link href="dnd35eMonsters.css" rel="stylesheet">
+</head>
+
+<body>
+
+    <!-- Your Monsters -->
+    <div class="card rounded-4 m-2">
+        <div class="card-header text-center fw-bold bg-info-subtle"> YOUR MONSTER LIST </div>
+        <div class="card-body bg-primary-subtle" id="your-monsters"></div>
+    </div>
+
+    <!-- Nav Items -->
+    <ul class="nav nav-tabs" id="myTab" role="tablist">
+        <!-- SRD TAB -->
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="srd-monsters" data-bs-toggle="tab" data-bs-target="#srd-monsters-pane" type="button" role="tab" aria-controls="srd-monsters-pane" aria-selected="true">SRD Monsters</button>
+        </li>
+        <!-- CUSTOM TAB -->
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="custom-monsters" data-bs-toggle="tab" data-bs-target="#custom-monsters-pane" type="button" role="tab" aria-controls="custom-monsters-pane" aria-selected="false">New Custom Monster</button>
+        </li>
+        <!-- SELECTED MONSTER -->
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="selected-monsters" data-bs-toggle="tab" data-bs-target="#selected-monsters-pane" type="button" role="tab" aria-controls="selected-monsters-pane" aria-selected="false">Selected Monster</button>
+        </li>
+    </ul>
+    <div class="tab-content" id="myTabContent">
+        <!-------------------------------------- SRD CONTENT-------------------------------------------------->
+        <div class="tab-pane fade show active" id="srd-monsters-pane" role="tabpanel" aria-labelledby="srd-monsters" tabindex="0">
+
+            <!-- dropdown -->
+            <div class="m-3" style="display: flex; align-items: center; flex-direction: row;">
+
+                <div class="m-1 col-5">
+
+                    <span for="monsterDropdown"> Select a Monster</span>
+                    <select class="form-select" id="monsterDropdown">
+                        <option selected value="">
+                        </option>
+                    </select>
+
+                </div>
+                <!---- DATALIST DOESNT WORK ON TALESPIRE
+                <div class="m-1">
+
+                    <span for="input-datalist">Or Search</span>
+                    <input class="form-control" type="text" list="srd-monster-datalist" id="input-datalist">
+
+                </div>
+ 
+                <div class="m-1"><br>
+                    <button id="search-monster" class="btn btn-sm btn-success" onclick="searchsrdmonster();">Search</button>
+                </div>
+---->
+                <div class="m-1 col-5">
+
+                    <span for="input-datalist">Or Search</span>
+                    <input class="form-control" type="text" id="input-search-monster" oninput="searchSrdMonster();">
+
+                    <div>
+                        <input type="file" id="fileInput" style="display: none;">
+                    </div>
+
+                </div>
+
+
+
+            </div>
+
+            <!-- data -->
+            <div id="search-results" class="rounded-6 m-1">
+            </div>
+
+            <div class="card rounded-6 m-1">
+
+                <div id="selectedSrdMonster">
+
+                </div>
+            </div>
+        </div>
+        <!---------------------------------- CUSTOM CONTENT--------------------------------------------------->
+        <div class="tab-pane fade" id="custom-monsters-pane" role="tabpanel" aria-labelledby="custom-monsters" tabindex="1">
+
+            <div class="card rounded-6 m-2" style="display: flex; flex-direction: row;">
+                <div>
+                    <button type="button" class="btn btn-success m-2" onclick="AddNewMonster();">Add to your monsters</button>
+                </div>
+                <div>
+                    <button class="btn btn-outline-success m-2" id="import-file-btn">Import from file</button>
+                    <input type="file" id="import-file-input" style="display: none;">
+                </div>
+                <div>
+                    <button type="button" class="btn btn-outline-success m-2" onclick="ExportMonster(true);">Export monster to file</button>
+                </div>
+                <div>
+                    <button type="button" class="btn btn-outline-success m-2" onclick="ExportMonster(false);">Copy to Clipboard</button>
+                </div>
+            </div>
+
+            <div class="card rounded-6 m-2">
+
+                <a class="btn btn-outline-warning" data-bs-toggle="collapse" href="#collapse-export-note" role="button" aria-expanded="false" aria-controls="collapse-export-note">
+                    Note on Export
+                </a>
+                <div class="collapse" id="collapse-export-note">
+                    <div class="card card-body">
+                        It doesn't work inside talespire. You can use the dnd35eMonsters.html in your browser to create and export a monster to a single .json file to share.<br><br>
+                        You can also click the "Copy to Clipboard" button, then paste the data in notepad and save the file wherever you want as a .json file.<br><br>You will be able to import those files here with the "Import from file" button.
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="card rounded-6 m-2">
+
+                <div class="card-body" id="customMonsterData">
+
+                    <form id="customMonsterForm">
+
+                        <div class="row g-1 align-items-center m-3">
+                            <div class="col-4">
+                                <label for="name" class="col-form-label">Name</label>
+                            </div>
+                            <div class="col-8">
+                                <input type="text" id="name" class="form-control" value=" my scary monster">
+                            </div>
+                        </div>
+
+                        <div class="row g-1 align-items-center m-3">
+                            <div class="col-4">
+                                <label for="challenge_rating" class="col-form-label">Challenge Rating</label>
+                            </div>
+                            <div class="col-2">
+                                <input type="text" id="challenge_rating" class="form-control">
+                            </div>
+
+                        </div>
+
+                        <div class="row g-1 align-items-center m-3">
+                            <div class="col-4">
+                                <label for="alignment" class="col-form-label">Alignment</label>
+                            </div>
+                            <div class="col-5">
+                                <select class="form-select" id="alignment">
+                                    <option value="Lawful Evil">Lawful Evil</option>
+                                    <option value="Lawful Good">Lawful Good</option>
+                                    <option value="Lawful Neutral">Lawful Neutral</option>
+                                    <option value="Neutral Neutral" selected>Neutral Neutral</option>
+                                    <option value="Chaotic Neutral">Chaotic Neutral</option>
+                                    <option value="Chaotic Good">Chaotic Good</option>
+                                    <option value="Chaotic Evil">Chaotic Evil</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="row g-1 align-items-center m-3">
+                            <div class="col-4">
+                                <label for="size" class="col-form-label">Size</label>
+                            </div>
+                            <div class="col-4">
+                                <select class="form-select" id="size">
+                                    <option value="Fine">Fine</option>
+                                    <option value="Diminutive">Diminutive</option>
+                                    <option value="Tiny">Tiny</option>
+                                    <option value="Small">Small</option>
+                                    <option value="Medium" selected>Medium</option>
+                                    <option value="Large">Large</option>
+                                    <option value="Huge">Huge</option>
+                                    <option value="Gargantuan">Gargantuan</option>
+                                    <option value="Colossal">Colossal</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="row g-1 align-items-center m-3">
+                            <div class="col-4">
+                                <label for="type" class="col-form-label">Type</label>
+                            </div>
+                            <div class="col-4">
+                                <input type="text" id="type" class="form-control">
+                            </div>
+                        </div>
+
+                        <div class="row g-1 align-items-center m-3">
+                            <div class="col-4">
+                                <label for="hit_dice" class="col-form-label">Hit Dice</label>
+                            </div>
+                            <div class="col-4">
+                                <input type="text" id="hit_dice" class="form-control">
+                                <div class="form-text">Ex: 2d8+1 (12 hp)</div>
+                            </div>
+                        </div>
+
+                        <div class="row g-1 align-items-center m-3">
+                            <div class="col-4">
+                                <label for="initiative" class="col-form-label">Initiative</label>
+                            </div>
+                            <div class="col-2">
+                                <input type="text" id="initiative" class="form-control">
+                                <div class="form-text">Ex: +3 </div>
+                            </div>
+                        </div>
+
+                        <div class="row g-1 align-items-center m-3">
+                            <div class="col-4">
+                                <label for="speed" class="col-form-label">Speed</label>
+                            </div>
+                            <div class="col-6">
+                                <input type="text" id="speed" class="form-control">
+                            </div>
+                        </div>
+
+                        <div class="row g-1 align-items-center m-3">
+                            <div class="col-4">
+                                <label for="armor_class" class="col-form-label">Armor Class</label>
+                            </div>
+                            <div class="col-8">
+                                <input type="text" id="armor_class" class="form-control">
+                                <div class="form-text">Ex: 16 (-2 size, +1 Dex, +7 natural), touch 9, flat-footed 15 </div>
+                            </div>
+                        </div>
+
+                        <div class="row g-1 align-items-center m-3">
+                            <div class="col-4">
+                                <label for="base_attack" class="col-form-label">Base Attack</label>
+                            </div>
+                            <div class="col-2">
+                                <input type="text" id="base_attack" class="form-control">
+                                <div class="form-text">Ex: +3 </div>
+                            </div>
+                        </div>
+
+                        <div class="row g-1 align-items-center m-3">
+                            <div class="col-4">
+                                <label for="grapple" class="col-form-label">Grapple</label>
+                            </div>
+                            <div class="col-2">
+                                <input type="text" id="grapple" class="form-control">
+                                <div class="form-text">Ex: +5 </div>
+                            </div>
+                        </div>
+
+                        <div class="row g-1 align-items-center m-3">
+                            <div class="col-4">
+                                <label for="attack" class="form-label">Attack</label>
+                            </div>
+                            <div class="col-8">
+                                <textarea class="form-control" id="attack" rows="1"></textarea>
+                                <div class="form-text">Ex: Bite +3 Damage 2d6+3 </div>
+                            </div>
+                        </div>
+
+                        <div class="row g-1 align-items-center m-3">
+                            <div class="col-4">
+                                <label for="full_attack" class="form-label">Full Attack</label>
+                            </div>
+                            <div class="col-8">
+                                <textarea class="form-control" id="full_attack" rows="2"></textarea>
+                                <div class="form-text">Ex: Bite +3 -> 2d6+3 Claw +5 Claw damage 1d8 , Tail +2 does 1d6 of damage </div>
+                            </div>
+                        </div>
+
+                        <div class="row g-1 align-items-center m-3">
+                            <div class="col-4">
+                                <label for="space" class="col-form-label">Space</label>
+                            </div>
+                            <div class="col-1">
+                                <input type="text" id="space" class="form-control">
+                            </div> ft
+                        </div>
+
+                        <div class="row g-1 align-items-center m-3">
+                            <div class="col-4">
+                                <label for="reach" class="col-form-label">Reach</label>
+                            </div>
+                            <div class="col-1">
+                                <input type="text" id="reach" class="form-control">
+                            </div> ft
+                        </div>
+
+                        <div class="row g-1 align-items-center m-3">
+                            <div class="col-4">
+                                <label for="special_attacks" class="col-form-label">Special Attacks</label>
+                            </div>
+                            <div class="col-8">
+                                <input type="text" id="special_attacks" class="form-control">
+                                <div class="form-text">line of lightning 12d6 (DC 25), crush 2d8+12 (DC 25) </div>
+                            </div>
+                        </div>
+
+                        <div class="row g-1 align-items-center m-3">
+                            <div class="col-4">
+                                <label for="special_qualities" class="col-form-label">Special Qualities</label>
+                            </div>
+                            <div class="col-8">
+                                <input type="text" id="special_qualities" class="form-control">
+                            </div>
+                        </div>
+
+                        <div class="row g-1 align-items-center m-3">
+                            <div class="col-4">
+                                <label for="saves" class="col-form-label">Saves</label>
+                            </div>
+                            <div class="col-8">
+                                <input type="text" id="saves" class="form-control">
+                                <div class="form-text">Fort +7, Ref +3, Will +11</div>
+                            </div>
+                        </div>
+
+                        <div class="row g-1 align-items-center m-3">
+                            <div class="col-4">
+                                <label for="abilities" class="col-form-label">Abilities</label>
+                            </div>
+                            <div class="col-8">
+                                <input type="text" id="abilities" class="form-control">
+                                <div class="form-text">Str 27, Dex 10, Con 21, Int 20, Wis 21, Cha 20</div>
+                            </div>
+                        </div>
+
+                        <div class="row g-1 align-items-center m-3">
+                            <div class="col-4">
+                                <label for="skills" class="col-form-label">Skills</label>
+                            </div>
+                            <div class="col-8">
+                                <input type="text" id="skills" class="form-control">
+                                <div class="form-text">Climb +14, Concentration +8, Escape Artist +5</div>
+                            </div>
+                        </div>
+
+                        <div class="row g-1 align-items-center m-3">
+                            <div class="col-4">
+                                <label for="feats" class="col-form-label">Feats</label>
+                            </div>
+                            <div class="col-8">
+                                <input type="text" id="feats" class="form-control">
+                            </div>
+                        </div>
+
+                        <div class="row g-1 align-items-center m-3">
+
+                            <div class="mb-3">
+                                <label for="details" class="form-label mt-2">
+                                    <h3>Description and Details</h3>
+                                </label>
+                                <textarea class="form-control" id="details" rows="10"></textarea>
+                            </div>
+
+                        </div>
+
+                    </form>
+
+                </div>
+            </div>
+
+        </div>
+        <!--------------------------- SELECTED MONSTER ---------------------------------------------------->
+        <div class="tab-pane fade" id="selected-monsters-pane" role="tabpanel" aria-labelledby="selected-monsters" tabindex="2">
+
+            <!-- data -->
+            <div class="card rounded-6 m-2">
+
+                <div class="card-body" id="selectedListMonster">
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="bootstrap.js"></script>
+    <script src="dnd35eMonsters.js"></script>
+</body>
+
+</html>

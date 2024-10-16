@@ -1,0 +1,19 @@
+{
+  "manifestVersion": 1,
+  "name": "dnd 3.5e Monsters",
+  "entryPoint": "/dnd35eMonsters.html",
+  "version": "0.1.0",
+  "descriptionFilePath": "/readme.md",
+  "api": {
+    "version": "0.1",
+    "initTimeout": 10
+  },
+  "environment": {
+    "webViewBackgroundColor": "#000000",
+    "extras": [
+      "fonts",
+      "icons",
+      "colorStyles"
+    ]
+  }
+}
