@@ -1,5 +1,8 @@
 /////////////////////////////////////////////////// SRD MONSTERS ////////////////////////////////////////////////
 var monsterDetailsArray = [];
+var featsObj = {};
+//var featsArrayTxt = [];
+//var featsArrayName = [];
 var srdMonsterData = {};
 var selectedListMonsterTemplate = `<br>
                     <p>
@@ -80,11 +83,18 @@ var selectedListMonsterTemplate = `<br>
                         </tr>
                         <tr>
                             <td class="custom-data-name  col-4 fw-bold col-1">Feats</td>
-                            <td class="select-data-monsterlist" id="selectedFeats"></td>
-                        </tr>
-                    </table><br>
-                    <h3>Monster Details</h3>
-                    <p class="select-data-monsterlist" id="selectedDetails"></p><br>`
+                            <td class="select-data-monsterlist" id="selectedFeats"></td> 
+                        </tr>                      
+                    </table> 
+                    
+                    <div id="monster-details-div"></div>
+                    <br>
+                    <div class="card rounded-6">
+                      <div class="card card-body">     
+                        <h1>Monster Details</h1>
+                          <p class="select-data-monsterlist" id="selectedDetails"></p><br>
+                      </div>
+                    </div>`
 
 function loadingFromMemory() {
 
@@ -181,8 +191,36 @@ function loadMonsterData() {
     xmlHttpRequest.send();
   });
 }
+
+function loadFeatsData() {
+  return new Promise((resolve, reject) => {
+    const xmlHttpRequest = new XMLHttpRequest();
+    xmlHttpRequest.open("GET", "feat.xml", true);
+    xmlHttpRequest.onload = function () {
+      if (xmlHttpRequest.status === 200) {
+        const xmlParser = new DOMParser();
+        const xmlDocument = xmlParser.parseFromString(xmlHttpRequest.responseText, "text/xml");
+        const feats = xmlDocument.getElementsByTagName("feat");
+
+        for (let i = 0; i < feats.length; i++) {
+          const feat = feats[i];
+          //featsArrayName[i] = feat.getElementsByTagName("name")[0].textContent;
+          //featsArrayTxt[i] = feat.getElementsByTagName("full_text")[0].innerHTML;
+          featsObj[`${feat.getElementsByTagName("name")[0].innerHTML}`] = feat.getElementsByTagName("full_text")[0].innerHTML;
+        }
+
+        resolve('Feat Data loaded'); // Resolve the promise with the data
+      } else {
+        reject(new Error("Error loading XML data: " + xmlHttpRequest.status));
+      }
+    };
+    xmlHttpRequest.send();
+  });
+}
 //////////////////////////////////////////////////// INIT //////////////////////////////////////////////////////
 window.onload = function () {
+
+  loadFeatsData();
 
   loadMonsterData().then(monsterData => {
     try {
@@ -219,7 +257,7 @@ window.onload = function () {
       console.error('Error fetching monster data:', error);
     }
     console.log("populated SRD data");
-    loadingFromMemory(); //------------------------------------------------------////////////////////////////-
+    //loadingFromMemory(); //------------------------------------------------------////////////////////////////-
     console.log("loaded data from memory");
   }).catch(error => {
     console.error("Error loading monster data:", error);
@@ -429,7 +467,54 @@ function populateListMonster(MonsterObject, fromSrd, srdFromMemory, customFromMe
         skillsHtml = "-";
       }
       document.getElementById('selectedSkills').innerHTML = skillsHtml;
-      document.getElementById('selectedFeats').innerHTML = MonsterObject['feats'];
+
+      //document.getElementById('selectedFeats').innerHTML = MonsterObject['feats'];
+      const MonsterFeatsArray = MonsterObject['feats'].split(', ');
+
+      for (let feat of MonsterFeatsArray) {
+
+        const featHTML = document.createElement('a');
+        featHTML.href = `#javascript.void(0)`;
+        featHTML.textContent = feat;
+        featHTML.id = feat.replace(/\s/g, '');
+
+        const closeFeat = document.createElement('button');
+        closeFeat.className = "btn-close m-1";
+        closeFeat.onclick = function () {
+          document.getElementById('feat-description-info').innerHTML = "";
+          document.getElementById('feat-div-container').remove();
+        }
+
+        featHTML.onclick = function () {
+          document.getElementById('feat-div-container')?.remove();
+
+          const card = document.createElement('div');
+          card.classList.add('card', 'rounded-6');
+          card.id = "feat-div-container"
+
+          const featDescriptionInfo = document.createElement('div');
+          featDescriptionInfo.id = 'feat-description-info';
+
+          card.appendChild(featDescriptionInfo);
+
+          document.getElementById('monster-details-div').insertBefore(card, document.getElementById('monster-details-div').firstChild);
+
+          //featName = feat.includes("Weapon Focus") && !feat.includes("Greater") ? "Weapon Focus" : feat ; // if feat includes requirement on name
+
+          featName = feat.replace(/\(([^)]+)\)/g, ``).trim();
+          console.log(featName)
+
+          document.getElementById('feat-description-info').innerHTML = featsObj[featName] == undefined ? "Non SRD Feat found" : featsObj[featName];
+          document.getElementById('feat-description-info').insertBefore(closeFeat, document.getElementById('feat-description-info').firstChild);
+          document.getElementById('feat-description-info').insertAfter
+        };
+
+        // Append the link to the selectedFeats element
+        document.getElementById('selectedFeats').appendChild(featHTML);
+        document.getElementById('selectedFeats').appendChild(document.createElement('br'));
+      }
+
+
       document.getElementById('selectedChallengeRating').innerHTML = MonsterObject['challenge_rating'];
 
       if (fromSrd) {
@@ -624,13 +709,13 @@ function d2d3Check(name, dice) {
 
       const resultMinimum1 = result <= 0 ? 1 : result;
 
-      total = total + resultMinimum1;      
+      total = total + resultMinimum1;
 
       //console.log(`roll ${rolld2d3} ${signMod} ${diceModSplitted[1]} = ${result} `)
 
       msg = msg + 'roll' + ` 1d${diceSplitted[1]}${signMod}${diceModSplitted[1]}   -->   <color="green">${rolld2d3}</color>${signMod}${diceModSplitted[1]} =  <color="green">${result}</color><br>`;
 
-    }    
+    }
 
     msg = msg + `<br><align="center"><size=200%><color="red">TOTAL: </color> <color="green">${total}`
 
