@@ -257,7 +257,7 @@ window.onload = function () {
       console.error('Error fetching monster data:', error);
     }
     console.log("populated SRD data");
-    //loadingFromMemory(); //------------------------------------------------------////////////////////////////-
+    loadingFromMemory(); //------------------------------------------------------////////////////////////////-
     console.log("loaded data from memory");
   }).catch(error => {
     console.error("Error loading monster data:", error);
